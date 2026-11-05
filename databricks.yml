@@ -1,0 +1,44 @@
+# Fund NAV demo pipeline - a playground for Genie ZeroOps.
+#
+# Two serverless Lakeflow Jobs:
+#   market_data_feed   simulated external vendor that delivers trades, EOD prices and FX fixings
+#   fund_nav_pipeline  ingest_to_silver -> build_positions -> compute_nav (daily NAV / AUM per fund)
+#
+# Deploy:  databricks bundle deploy -t demo
+# Run:     databricks bundle run market_data_feed -t demo && databricks bundle run fund_nav_pipeline -t demo
+
+bundle:
+  name: geniezeroops
+
+include:
+  - resources/*.yml
+
+variables:
+  catalog:
+    description: Unity Catalog catalog that holds the demo schema.
+  schema:
+    description: Schema for all demo tables.
+    default: zeroops_nav_demo
+  feed_schema_version:
+    description: Delivery format version of the market data vendor feed.
+    default: v1
+  schedule_pause_status:
+    description: PAUSED or UNPAUSED for the daily schedules.
+    default: PAUSED
+
+targets:
+  # Personal iteration: resources are prefixed with [dev <user>] and schedules are paused.
+  dev:
+    mode: development
+    workspace:
+      host: https://fevm-odcs-sdp-dqx.cloud.databricks.com
+    variables:
+      catalog: odcs_sdp_dqx_catalog
+
+  # The "production" deployment that Genie ZeroOps monitors.
+  demo:
+    default: true
+    workspace:
+      host: https://fevm-odcs-sdp-dqx.cloud.databricks.com
+    variables:
+      catalog: odcs_sdp_dqx_catalog

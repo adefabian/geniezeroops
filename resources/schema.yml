@@ -1,0 +1,6 @@
+resources:
+  schemas:
+    nav_demo:
+      catalog_name: ${var.catalog}
+      name: ${var.schema}
+      comment: Fund NAV demo pipeline (synthetic data only).

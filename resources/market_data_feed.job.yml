@@ -1,0 +1,31 @@
+resources:
+  jobs:
+    market_data_feed:
+      name: market_data_feed
+      description: >
+        Simulated external market data vendor. Every business day it delivers the trade blotter,
+        end-of-day prices and intraday FX fixings as latest-delivery snapshot tables
+        (raw_trades, raw_prices, raw_fx_rates) and refreshes the reference data.
+      tags:
+        demo: genie-zeroops
+        layer: upstream
+      max_concurrent_runs: 1
+      queue:
+        enabled: true
+      schedule:
+        quartz_cron_expression: "0 0 6 ? * MON-FRI"
+        timezone_id: Europe/Berlin
+        pause_status: ${var.schedule_pause_status}
+      parameters:
+        - name: catalog
+          default: ${var.catalog}
+        - name: schema
+          default: ${resources.schemas.nav_demo.name}
+        - name: business_date
+          default: "{{job.start_time.iso_date}}"
+        - name: feed_schema_version
+          default: ${var.feed_schema_version}
+      tasks:
+        - task_key: deliver_market_data
+          notebook_task:
+            notebook_path: ../src/market_data_feed.py

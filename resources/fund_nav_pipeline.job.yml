@@ -1,0 +1,41 @@
+resources:
+  jobs:
+    fund_nav_pipeline:
+      name: fund_nav_pipeline
+      description: >
+        Daily fund valuation. Ingests the vendor delivery into silver, builds positions from the
+        opening book plus all trades, values them with EOD prices and the official FX fixing,
+        and publishes NAV / AUM per fund (gold_fund_nav).
+      tags:
+        demo: genie-zeroops
+        layer: nav
+      max_concurrent_runs: 1
+      queue:
+        enabled: true
+      schedule:
+        quartz_cron_expression: "0 30 6 ? * MON-FRI"
+        timezone_id: Europe/Berlin
+        pause_status: ${var.schedule_pause_status}
+      parameters:
+        - name: catalog
+          default: ${var.catalog}
+        - name: schema
+          default: ${resources.schemas.nav_demo.name}
+        - name: business_date
+          default: "{{job.start_time.iso_date}}"
+      tasks:
+        - task_key: ingest_to_silver
+          notebook_task:
+            notebook_path: ../src/ingest_to_silver.py
+
+        - task_key: build_positions
+          depends_on:
+            - task_key: ingest_to_silver
+          notebook_task:
+            notebook_path: ../src/build_positions.py
+
+        - task_key: compute_nav
+          depends_on:
+            - task_key: build_positions
+          notebook_task:
+            notebook_path: ../src/compute_nav.py

@@ -1,0 +1,16 @@
+[project]
+name = "geniezeroops"
+version = "0.1.0"
+description = "Fund NAV demo pipeline (Databricks Asset Bundle) - a Genie ZeroOps playground"
+requires-python = ">=3.11"
+dependencies = []
+
+[dependency-groups]
+dev = [
+    "pyspark>=4.0,<5",
+    "pytest>=8",
+]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]
