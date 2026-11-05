@@ -27,7 +27,7 @@ def standardize_prices(raw: DataFrame) -> DataFrame:
     return raw.select(
         F.col("isin"),
         F.col("price_date").cast("date").alias("price_date"),
-        F.col("close_price").cast("double").alias("close_price"),
+        F.col("px_last").cast("double").alias("close_price"),
         F.upper(F.col("currency")).alias("currency"),
     )
 
